@@ -11,9 +11,14 @@ app.get('/', (req, res) => {
 });
 
 io.on('connection', (socket) => {
-    console.log("a user connected")
+    console.log('new connection', socket.id)
+    socket.on("PING", (data)=>{
+        console.log("ping" + data)
+        io.emit("PONG","pings")
+    })
+
 })
 
-http.listen(3000, () => {
+http.listen(8080, () => {
     console.log('listening on *:3000');
 });
