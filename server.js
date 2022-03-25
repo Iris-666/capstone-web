@@ -132,20 +132,16 @@ app.get('/SendLocation', async function(req, res) {
         data += chunk
     })
     response.on("end", ()=>{
-        //console.log(data)
         let arrayData =data.split('<')
         let allNodes = {}
-        // console.log(arrayData)
         for(let i = 0; i < arrayData.length; i++){
             if(arrayData[i].includes("node")){
-                // let jsonData = arrayData[i].replace("=", ":")
                 // console.log(arrayData[i])
-                let nodeID = arrayData[i].substring(9, 19)
+                let nodeID = arrayData[i].substring(arrayData[i].search("id=")+4, arrayData[i].indexOf(`"`,arrayData[i].search("id=")+4))
+                // console.log(nodeID)
                 let nodeLat = arrayData[i].substring(arrayData[i].search("lat=")+5, arrayData[i].indexOf(`"`,arrayData[i].search("lat=")+5))
                 let nodeLong = arrayData[i].substring(arrayData[i].search("lon=")+5,arrayData[i].indexOf(`"/`,arrayData[i].search("lon=")+5))
                 allNodes[nodeID] = {"nodeLat": nodeLat, "nodeLong": nodeLong}
-                //console.log(nodeLat, nodeLong)
-
             }
         }
         let shortest = 0
@@ -163,17 +159,66 @@ app.get('/SendLocation', async function(req, res) {
                 closestNode = key
             }
         }
-        //console.log("closestNode: "+closestNode) 
         //the node that is closest to the user
+        // console.log("closestNode: "+closestNode) 
+
         https.get(`https://www.openstreetmap.org/api/0.6/node/${closestNode}/ways`,(response)=>{
             let data = ""
             response.on("data", (chunk)=>{
                 data += chunk
             })
             response.on("end", ()=>{
-                console.log(data)
-                res.json(data);
+                // console.log(data)
+                // res.json(data);
             })
+        })
+
+        https.get("https://www.openstreetmap.org/api/0.6/node/103990314/ways", (response)=>{
+            let data = ""
+            let crossroads = []
+
+            response.on("data", (chunk)=>{
+                data += chunk
+            })
+            response.on("end", ()=>{
+                let arrayData =data.split('<')
+        
+                // console.log(arrayData)
+                for(let i = 0; i < arrayData.length; i++){
+                    if(arrayData[i].includes("nd ref=")){
+                        let nodeID = arrayData[i].substring(arrayData[i].search("ref=")+5, arrayData[i].indexOf(`"/`,arrayData[i].search("ref=")+5))
+                        // console.log(nodeID)
+                        https.get(`https://www.openstreetmap.org/api/0.6/node/${nodeID}/ways`,(response)=>{
+                            let data1 = ""
+                            response.on("data", (chunk)=>{
+                                data1 += chunk
+                            })
+                            response.on("end",()=>{
+                                // console.log(data1+"-------------------")
+                                var pos = 0;
+                                var num = -1;
+                                var i = -1;
+                                
+                                // Search the string and counts the number of e's
+                                while (pos != -1) {
+                                    pos = data1.indexOf(`tag k="name"`, i + 1);
+                                    num += 1;
+                                    i = pos;
+                                }
+                                console.log("there are "+num+" roads through this node")
+                                if(num >1){
+                                    crossroads.push(nodeID)
+                                    console.log(crossroads)
+
+                                }
+                            })
+                        })
+                        // allNodes[nodeID] = {"nodeLat": nodeLat, "nodeLong": nodeLong}
+                    }
+                }
+        
+            })
+            console.log("crossroads: "+crossroads)
         })
     })
 
