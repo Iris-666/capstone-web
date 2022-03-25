@@ -113,15 +113,18 @@ https.get("https://www.openstreetmap.org/api/0.6/node/602360462/ways", (response
 app.get('/SendLocation', async function(req, res) {
     let lat = parseFloat(req.query.lat);
     let long = parseFloat(req.query.long);
-
+  
+  console.log("lat= "+lat + "long = "+long)
+    
+    let bboxleft, bboxright,bboxbottom, bboxtop
     // if(lastUserLocation != userLocation){
-        bboxleft = long - 0.0001;
-        bboxright = long + 0.0001;
-        bboxbottom = lat - 0.0001;
-        bboxtop = lat + 0.0001;
+        bboxleft = long - 0.00015;
+        bboxright = long + 0.00015;
+        bboxbottom = lat - 0.00015;
+        bboxtop = lat + 0.00015;
         // }
 
-    console.log(bboxleft,bboxright,bboxbottom,bboxtop)
+    //console.log(bboxleft,bboxright,bboxbottom,bboxtop)
 
     https.get(`https://api.openstreetmap.org/api/0.6/map?bbox=${bboxleft},${bboxbottom},${bboxright},${bboxtop}`, (response)=>{
     let data = ""
@@ -129,7 +132,7 @@ app.get('/SendLocation', async function(req, res) {
         data += chunk
     })
     response.on("end", ()=>{
-        // console.log(data)
+        //console.log(data)
         let arrayData =data.split('<')
         let allNodes = {}
         // console.log(arrayData)
@@ -141,7 +144,7 @@ app.get('/SendLocation', async function(req, res) {
                 let nodeLat = arrayData[i].substring(arrayData[i].search("lat=")+5, arrayData[i].indexOf(`"`,arrayData[i].search("lat=")+5))
                 let nodeLong = arrayData[i].substring(arrayData[i].search("lon=")+5,arrayData[i].indexOf(`"/`,arrayData[i].search("lon=")+5))
                 allNodes[nodeID] = {"nodeLat": nodeLat, "nodeLong": nodeLong}
-                // console.log(nodeLat, nodeLong)
+                //console.log(nodeLat, nodeLong)
 
             }
         }
@@ -149,7 +152,7 @@ app.get('/SendLocation', async function(req, res) {
         let closestNode
         for(let key in allNodes){
             let distance = twoPointDistance(parseFloat(lat), parseFloat(long),parseFloat(allNodes[key].nodeLat), parseFloat(allNodes[key].nodeLong))
-            // console.log(distance)
+            //console.log(distance)
             allNodes[key].distance = distance
             if(distance < shortest || shortest == 0){
                 shortest = distance
@@ -160,7 +163,7 @@ app.get('/SendLocation', async function(req, res) {
                 closestNode = key
             }
         }
-        console.log(closestNode) 
+        //console.log("closestNode: "+closestNode) 
         //the node that is closest to the user
         https.get(`https://www.openstreetmap.org/api/0.6/node/${closestNode}/ways`,(response)=>{
             let data = ""
