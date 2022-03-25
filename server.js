@@ -167,7 +167,7 @@ app.get('/SendLocation', async function(req, res) {
             })
             response.on("end", ()=>{
                 console.log(data)
-                document.write(data)
+                res.json(data);
             })
         })
     })
@@ -181,7 +181,7 @@ app.get('/SendLocation', async function(req, res) {
     waypoints.push({ lat: 55.555, long: 66.666, label: "Go here next" });
 
 
-    res.json(waypoints);
+    // res.json(waypoints);
 });
 
 
