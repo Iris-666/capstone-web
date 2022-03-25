@@ -96,7 +96,7 @@ https.get("https://www.openstreetmap.org/api/0.6/node/602360462/ways", (response
             })
             response.on("end", ()=>{
                 console.log(data)
-                document.write(data)
+                // document.write(data)
             })
         })
     })
@@ -111,11 +111,6 @@ https.get("https://www.openstreetmap.org/api/0.6/node/602360462/ways", (response
 app.get('/SendLocation', async function(req, res) {
     let lat = parseFloat(req.query.lat);
     let long = parseFloat(req.query.long);
-
-    bboxleft = long - 0.0001;
-    bboxright = long + 0.0001;
-    bboxbottom = lat - 0.0001;
-    bboxtop = lat + 0.0001;
 
     // if(lastUserLocation != userLocation){
         bboxleft = long - 0.0001;
