@@ -41,67 +41,69 @@ https.get("https://www.openstreetmap.org/api/0.6/node/602360462/ways", (response
 })
 
 // setInterval(() => {
-    if(lastUserLocation != userLocation){
-        bboxleft = userLocation.longitude - 0.0001;
-        bboxright = userLocation.longitude + 0.0001;
-        bboxbottom = userLocation.latitude - 0.0001;
-        bboxtop = userLocation.latitude + 0.0001;
-    }
 
-    console.log(bboxleft,bboxright,bboxbottom,bboxtop)
 
-    https.get(`https://api.openstreetmap.org/api/0.6/map?bbox=${bboxleft},${bboxbottom},${bboxright},${bboxtop}`, (response)=>{
-    let data = ""
-    response.on("data", (chunk)=>{
-        data += chunk
-    })
-    response.on("end", ()=>{
-        // console.log(data)
-        let arrayData =data.split('<')
-        let allNodes = {}
-        // console.log(arrayData)
-        for(let i = 0; i < arrayData.length; i++){
-            if(arrayData[i].includes("node")){
-                // let jsonData = arrayData[i].replace("=", ":")
-                // console.log(arrayData[i])
-                let nodeID = arrayData[i].substring(9, 19)
-                let nodeLat = arrayData[i].substring(arrayData[i].search("lat=")+5, arrayData[i].indexOf(`"`,arrayData[i].search("lat=")+5))
-                let nodeLong = arrayData[i].substring(arrayData[i].search("lon=")+5,arrayData[i].indexOf(`"/`,arrayData[i].search("lon=")+5))
-                allNodes[nodeID] = {"nodeLat": nodeLat, "nodeLong": nodeLong}
-                // console.log(nodeLat, nodeLong)
+//     if(lastUserLocation != userLocation){
+//         bboxleft = userLocation.longitude - 0.0001;
+//         bboxright = userLocation.longitude + 0.0001;
+//         bboxbottom = userLocation.latitude - 0.0001;
+//         bboxtop = userLocation.latitude + 0.0001;
+//     }
 
-            }
-        }
-        let shortest = 0
-        let closestNode
-        for(let key in allNodes){
-            let distance = twoPointDistance(parseFloat(userLocation.latitude), parseFloat(userLocation.longitude),parseFloat(allNodes[key].nodeLat), parseFloat(allNodes[key].nodeLong))
-            // console.log(distance)
-            allNodes[key].distance = distance
-            if(distance < shortest || shortest == 0){
-                shortest = distance
-            }
-        }
-        for(let key in allNodes){
-            if(allNodes[key].distance == shortest){
-                closestNode = key
-            }
-        }
-        console.log(closestNode) 
-        //the node that is closest to the user
-        https.get(`https://www.openstreetmap.org/api/0.6/node/${closestNode}/ways`,(response)=>{
-            let data = ""
-            response.on("data", (chunk)=>{
-                data += chunk
-            })
-            response.on("end", ()=>{
-                console.log(data)
-                // document.write(data)
-            })
-        })
-    })
+//     console.log(bboxleft,bboxright,bboxbottom,bboxtop)
 
-})
+//     https.get(`https://api.openstreetmap.org/api/0.6/map?bbox=${bboxleft},${bboxbottom},${bboxright},${bboxtop}`, (response)=>{
+//     let data = ""
+//     response.on("data", (chunk)=>{
+//         data += chunk
+//     })
+//     response.on("end", ()=>{
+//         // console.log(data)
+//         let arrayData =data.split('<')
+//         let allNodes = {}
+//         // console.log(arrayData)
+//         for(let i = 0; i < arrayData.length; i++){
+//             if(arrayData[i].includes("node")){
+//                 // let jsonData = arrayData[i].replace("=", ":")
+//                 // console.log(arrayData[i])
+//                 let nodeID = arrayData[i].substring(9, 19)
+//                 let nodeLat = arrayData[i].substring(arrayData[i].search("lat=")+5, arrayData[i].indexOf(`"`,arrayData[i].search("lat=")+5))
+//                 let nodeLong = arrayData[i].substring(arrayData[i].search("lon=")+5,arrayData[i].indexOf(`"/`,arrayData[i].search("lon=")+5))
+//                 allNodes[nodeID] = {"nodeLat": nodeLat, "nodeLong": nodeLong}
+//                 // console.log(nodeLat, nodeLong)
+
+//             }
+//         }
+//         let shortest = 0
+//         let closestNode
+//         for(let key in allNodes){
+//             let distance = twoPointDistance(parseFloat(userLocation.latitude), parseFloat(userLocation.longitude),parseFloat(allNodes[key].nodeLat), parseFloat(allNodes[key].nodeLong))
+//             // console.log(distance)
+//             allNodes[key].distance = distance
+//             if(distance < shortest || shortest == 0){
+//                 shortest = distance
+//             }
+//         }
+//         for(let key in allNodes){
+//             if(allNodes[key].distance == shortest){
+//                 closestNode = key
+//             }
+//         }
+//         console.log(closestNode) 
+//         //the node that is closest to the user
+//         https.get(`https://www.openstreetmap.org/api/0.6/node/${closestNode}/ways`,(response)=>{
+//             let data = ""
+//             response.on("data", (chunk)=>{
+//                 data += chunk
+//             })
+//             response.on("end", ()=>{
+//                 console.log(data)
+//                 // document.write(data)
+//             })
+//         })
+//     })
+
+// })
 // }, 10000);
 
 // app.get('/route', async function(req, res)=>{
