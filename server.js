@@ -43,75 +43,6 @@ https.get("https://www.openstreetmap.org/api/0.6/node/602360462/ways", (response
     })
 })
 
-// setInterval(() => {
-
-
-//     if(lastUserLocation != userLocation){
-//         bboxleft = userLocation.longitude - 0.0001;
-//         bboxright = userLocation.longitude + 0.0001;
-//         bboxbottom = userLocation.latitude - 0.0001;
-//         bboxtop = userLocation.latitude + 0.0001;
-//     }
-
-//     console.log(bboxleft,bboxright,bboxbottom,bboxtop)
-
-//     https.get(`https://api.openstreetmap.org/api/0.6/map?bbox=${bboxleft},${bboxbottom},${bboxright},${bboxtop}`, (response)=>{
-//     let data = ""
-//     response.on("data", (chunk)=>{
-//         data += chunk
-//     })
-//     response.on("end", ()=>{
-//         // console.log(data)
-//         let arrayData =data.split('<')
-//         let allNodes = {}
-//         // console.log(arrayData)
-//         for(let i = 0; i < arrayData.length; i++){
-//             if(arrayData[i].includes("node")){
-//                 // let jsonData = arrayData[i].replace("=", ":")
-//                 // console.log(arrayData[i])
-//                 let nodeID = arrayData[i].substring(9, 19)
-//                 let nodeLat = arrayData[i].substring(arrayData[i].search("lat=")+5, arrayData[i].indexOf(`"`,arrayData[i].search("lat=")+5))
-//                 let nodeLong = arrayData[i].substring(arrayData[i].search("lon=")+5,arrayData[i].indexOf(`"/`,arrayData[i].search("lon=")+5))
-//                 allNodes[nodeID] = {"nodeLat": nodeLat, "nodeLong": nodeLong}
-//                 // console.log(nodeLat, nodeLong)
-
-//             }
-//         }
-//         let shortest = 0
-//         let closestNode
-//         for(let key in allNodes){
-//             let distance = twoPointDistance(parseFloat(userLocation.latitude), parseFloat(userLocation.longitude),parseFloat(allNodes[key].nodeLat), parseFloat(allNodes[key].nodeLong))
-//             // console.log(distance)
-//             allNodes[key].distance = distance
-//             if(distance < shortest || shortest == 0){
-//                 shortest = distance
-//             }
-//         }
-//         for(let key in allNodes){
-//             if(allNodes[key].distance == shortest){
-//                 closestNode = key
-//             }
-//         }
-//         console.log(closestNode) 
-//         //the node that is closest to the user
-//         https.get(`https://www.openstreetmap.org/api/0.6/node/${closestNode}/ways`,(response)=>{
-//             let data = ""
-//             response.on("data", (chunk)=>{
-//                 data += chunk
-//             })
-//             response.on("end", ()=>{
-//                 console.log(data)
-//                 // document.write(data)
-//             })
-//         })
-//     })
-
-// })
-// }, 10000);
-
-// app.get('/route', async function(req, res)=>{
-
-// })
 
 app.get('/SendLocation', async function(req, res) {
     let lat = parseFloat(req.query.lat);
@@ -178,6 +109,7 @@ app.get('/SendLocation', async function(req, res) {
 
         https.get("https://www.openstreetmap.org/api/0.6/node/103990314/ways", (response)=>{
             let data = ""
+            let crossroad;
             let crossroads = []
 
             response.on("data", (chunk)=>{
@@ -215,20 +147,24 @@ app.get('/SendLocation', async function(req, res) {
                         //     })
                         // })
 
-                        getCrossRoads(nodeID)
-                        // allNodes[nodeID] = {"nodeLat": nodeLat, "nodeLong": nodeLong}
+                        
+                        getCrossRoads(nodeID).then(crossroad =>{
+                            if(crossroad.length >1){
+                                crossroads.push(nodeID)
+                            }
+                            console.log("crossroads: "+JSON.stringify(crossroad))
+    
+                        })
                     }
-
                 }
-        
             })
             //how to have a function that only execute after all the requests are done??
-            setTimeout(function(){
-                console.log("crossroads: "+crossroads)
-                let nodeIndex = Math.floor(Math.random() * crossroads.length)
-                let nextNode = crossroads[nodeIndex]
-                console.log(nextNode)
-            },3000)
+            // setTimeout(function(){
+                // console.log("crossroads: "+crossroads)
+                // let nodeIndex = Math.floor(Math.random() * crossroads.length)
+                // let nextNode = crossroads[nodeIndex]
+                // console.log(nextNode)
+            // },3000)
         })
     })
 
@@ -263,26 +199,26 @@ async function getCrossRoads(nodeID){
     let validWays = []
     if(ways.elements.length > 1){
         for(let i=0; i<ways.elements.length; i++){
-            for(let j=0; j<validWays.length;j++){
-                if(ways.elements[i].tags.name == validWays[j].tags.name){
-                    return
-                }
-            }
-        validWays.push(ways.elements[i])
-        console.log(ways.elements[i].tags.name)
-        }
-    }
-    if(ways.elements.length > 1){
-        for(let i=0; i<ways.elements.length; i++){
-            // console.log(ways.elements[i].tags.highway)
+            // console.log(validWays[i].tags.highway)
             if(wayTags.includes(ways.elements[i].tags.highway)){
                 waysCount ++;
+                validWays.push(ways.elements[i])
             }
         }
     }
+    //check if the names of the roads are all different since different parts of the same road may have different IDs
     if(waysCount > 1){
-
+        for(let i=0; i<validWays.length;i++){
+            for(let j=i+1; j<validWays.length;j++){
+                if(validWays[i].tags.name==validWays[j].tags.name && validWays[i].tags.name != undefined){
+                    validWays.splice(j,1)
+                    j--
+                }
+            }
+        }
     }
+    // console.log(validWays)
+    return validWays;
 
 }
 
