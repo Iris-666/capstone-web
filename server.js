@@ -47,6 +47,7 @@ https.get("https://www.openstreetmap.org/api/0.6/node/602360462/ways", (response
 app.get('/SendLocation', async function(req, res) {
     let lat = parseFloat(req.query.lat);
     let long = parseFloat(req.query.long);
+    let nextNode
   
   console.log("lat= "+lat + "long = "+long)
     
@@ -112,6 +113,9 @@ app.get('/SendLocation', async function(req, res) {
             let crossroad;
             let crossroads = []
 
+            let validData = [];
+            // let crossroads = []
+
             response.on("data", (chunk)=>{
                 data += chunk
             })
@@ -121,42 +125,47 @@ app.get('/SendLocation', async function(req, res) {
                 // console.log(arrayData)
                 for(let i = 0; i < arrayData.length; i++){
                     if(arrayData[i].includes("nd ref=")){
-                        let nodeID = arrayData[i].substring(arrayData[i].search("ref=")+5, arrayData[i].indexOf(`"/`,arrayData[i].search("ref=")+5))
-                        // console.log(nodeID)
-                        // https.get(`https://www.openstreetmap.org/api/0.6/node/${nodeID}/ways`,(response)=>{
-                        //     let data1 = ""
-                        //     response.on("data", (chunk)=>{
-                        //         data1 += chunk
-                        //     })
-                        //     response.on("end",()=>{
-                        //         // console.log(data1+"-------------------")
-                        //         var pos = 0;
-                        //         var num = -1;
-                        //         var i = -1;
-                                
-                        //         // Search the string and counts the number of e's
-                        //         while (pos != -1) {
-                        //             pos = data1.indexOf(`tag k="name"`, i + 1);
-                        //             num += 1;
-                        //             i = pos;
-                        //         }
-                        //         // console.log("there are "+num+" roads through this node")
-                        //         if(num >1){
-                        //             crossroads.push(nodeID)
-                        //         }
-                        //     })
-                        // })
-
-                        
-                        getCrossRoads(nodeID).then(crossroad =>{
-                            if(crossroad.length >1){
-                                crossroads.push(nodeID)
-                            }
-                            console.log("crossroads: "+JSON.stringify(crossroad))
-    
-                        })
+                        validData.push(arrayData[i])
                     }
                 }
+                let accomplished = 0;
+                for(let i = 0; i<validData.length; i++){
+                    let nodeID = validData[i].substring(validData[i].search("ref=")+5, validData[i].indexOf(`"/`, validData[i].search("ref=")+5))
+                    getCrossRoads(nodeID).then(crossroad =>{
+                        accomplished ++;
+                        if(crossroad.length > 1){
+                            crossroads.push(nodeID)
+                            console.log("push")
+                        }
+                        if(accomplished == validData.length-1){
+                            console.log("these nodes contains crossroads: ")
+                            console.log(crossroads)
+                            let nodeIndex = Math.floor(Math.random() * crossroads.length)
+                            nextNode = crossroads[nodeIndex]
+                            res.json(nextNode)
+                        }
+                    })
+                }
+
+                // for(let i = 0; i < arrayData.length; i++){
+                //     if(arrayData[i].includes("nd ref=")){
+                //         let nodeID = arrayData[i].substring(arrayData[i].search("ref=")+5, arrayData[i].indexOf(`"/`,arrayData[i].search("ref=")+5))
+                //         getCrossRoads(nodeID).then(crossroad =>{
+                //             if(crossroad.length >1){
+                //                 crossroads.push(nodeID)
+                //                 // console.log(i, arrayData.length)
+                //             }
+                //             console.log(i, arrayData.length)
+                //             if(i == arrayData.length - 1){
+                //                 console.log("crossRoads "+crossroads)
+
+                //             }
+                //             // console.log("crossroads: "+JSON.stringify(crossroad))
+                //             // console.log("crossroads: "+crossroad.length)
+                //         })
+                //     }
+                // }
+                // console.log("crossRoads length "+crossroads.length)
             })
             //how to have a function that only execute after all the requests are done??
             // setTimeout(function(){
@@ -172,6 +181,7 @@ app.get('/SendLocation', async function(req, res) {
 
 
     let waypoints = [];
+
 
 
     waypoints.push({ lat: 55.555, long: 66.666, label: "Go here next" });
