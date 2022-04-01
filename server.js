@@ -147,33 +147,7 @@ app.get('/SendLocation', async function(req, res) {
                     })
                 }
 
-                // for(let i = 0; i < arrayData.length; i++){
-                //     if(arrayData[i].includes("nd ref=")){
-                //         let nodeID = arrayData[i].substring(arrayData[i].search("ref=")+5, arrayData[i].indexOf(`"/`,arrayData[i].search("ref=")+5))
-                //         getCrossRoads(nodeID).then(crossroad =>{
-                //             if(crossroad.length >1){
-                //                 crossroads.push(nodeID)
-                //                 // console.log(i, arrayData.length)
-                //             }
-                //             console.log(i, arrayData.length)
-                //             if(i == arrayData.length - 1){
-                //                 console.log("crossRoads "+crossroads)
-
-                //             }
-                //             // console.log("crossroads: "+JSON.stringify(crossroad))
-                //             // console.log("crossroads: "+crossroad.length)
-                //         })
-                //     }
-                // }
-                // console.log("crossRoads length "+crossroads.length)
             })
-            //how to have a function that only execute after all the requests are done??
-            // setTimeout(function(){
-                // console.log("crossroads: "+crossroads)
-                // let nodeIndex = Math.floor(Math.random() * crossroads.length)
-                // let nextNode = crossroads[nodeIndex]
-                // console.log(nextNode)
-            // },3000)
         })
     })
 
