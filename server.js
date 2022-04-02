@@ -48,6 +48,7 @@ app.get('/SendLocation', async function(req, res) {
     let lat = parseFloat(req.query.lat);
     let long = parseFloat(req.query.long);
     let nextNode
+    let sendBackMsg = []
   
   console.log("lat= "+lat + "long = "+long)
     
@@ -142,7 +143,15 @@ app.get('/SendLocation', async function(req, res) {
                             console.log(crossroads)
                             let nodeIndex = Math.floor(Math.random() * crossroads.length)
                             nextNode = crossroads[nodeIndex]
-                            res.json(nextNode)
+                            getNodeData(nextNode).then(nodeData=>{
+                                // console.log("getNodeData: "+nodeData)
+                                let lat = nodeData.substring(nodeData.search("lat=")+5, nodeData.indexOf(`"`,nodeData.search("lat=")+5))
+                                let long = nodeData.substring(nodeData.search("lon=")+5,nodeData.indexOf(`"/`,nodeData.search("lon=")+5))
+                                console.log("lat: "+lat+" long: "+long)
+
+                            })
+                            sendBackMsg.push({nodeID: nextNode, lat: lat, long: long})
+                            res.json(sendBackMsg)
                         }
                     })
                 }
@@ -175,10 +184,20 @@ async function getWays(id) {
     return await response.json();
 }
 
+async function getNodeData(id){
+	let response = await fetch('https://www.openstreetmap.org/api/0.6/node/' + id);
+    // console.log(response.text())
+    return await response.text();
+}
 async function getCrossRoads(nodeID){
     let ways = await getWays(nodeID)
+    // let nodeData = await getNodeData(nodeID)
     console.log("nodeID: "+nodeID)
-    // console.log(ways.elements.length)
+    // let lat = nodeData.substring(nodeData.search("lat=")+5, nodeData.indexOf(`"`,nodeData.search("lat=")+5))
+    // let long = nodeData.substring(nodeData.search("lon=")+5,nodeData.indexOf(`"/`,nodeData.search("lon=")+5))
+    // console.log("lat: "+lat+" long: "+long)
+
+    // console.log(ways.elements)
     let waysCount = 0
     let validWays = []
     if(ways.elements.length > 1){
@@ -187,6 +206,7 @@ async function getCrossRoads(nodeID){
             if(wayTags.includes(ways.elements[i].tags.highway)){
                 waysCount ++;
                 validWays.push(ways.elements[i])
+                // validWays.push({ways: ways.elements[i], lat: lat, long: long})
             }
         }
     }
@@ -201,7 +221,7 @@ async function getCrossRoads(nodeID){
             }
         }
     }
-    // console.log(validWays)
+    // console.log("validWays: "+validWays)
     return validWays;
 
 }
