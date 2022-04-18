@@ -31,18 +31,6 @@ app.get('/', (req, res) => {
 
 // })
 
-https.get("https://www.openstreetmap.org/api/0.6/node/602360462/ways", (response)=>{
-    let data = ""
-    response.on("data", (chunk)=>{
-        data += chunk
-        // console.log(data)
-    })
-
-    response.on("end", ()=>{
-        // console.log(data)
-    })
-})
-
 
 app.get('/SendLocation', async function(req, res) {
     let lat = parseFloat(req.query.lat);
@@ -60,7 +48,7 @@ app.get('/SendLocation', async function(req, res) {
         bboxtop = lat + 0.00015;
         // }
 
-    //console.log(bboxleft,bboxright,bboxbottom,bboxtop)
+    console.log(bboxleft,bboxright,bboxbottom,bboxtop)
 
     https.get(`https://api.openstreetmap.org/api/0.6/map?bbox=${bboxleft},${bboxbottom},${bboxright},${bboxtop}`, (response)=>{
     let data = ""
@@ -98,18 +86,9 @@ app.get('/SendLocation', async function(req, res) {
         //the node that is closest to the user
         // console.log("closestNode: "+closestNode) 
 
-        https.get(`https://www.openstreetmap.org/api/0.6/node/${closestNode}/ways`,(response)=>{
-            let data = ""
-            response.on("data", (chunk)=>{
-                data += chunk
-            })
-            response.on("end", ()=>{
-                // console.log(data)
-                // res.json(data);
-            })
-        })
 
-        https.get("https://www.openstreetmap.org/api/0.6/node/103990314/ways", (response)=>{
+        // https.get("https://www.openstreetmap.org/api/0.6/node/103990314/ways", (response)=>{
+            https.get(`https://www.openstreetmap.org/api/0.6/node/${closestNode}/ways`,(response)=>{
             let data = ""
             let crossroad;
             let crossroads = []
@@ -144,7 +123,6 @@ app.get('/SendLocation', async function(req, res) {
                             let nodeIndex = Math.floor(Math.random() * crossroads.length)
                             nextNode = crossroads[nodeIndex]
                             getNodeData(nextNode).then(nodeData=>{
-                                // console.log("getNodeData: "+nodeData)
                                 let lat = nodeData.substring(nodeData.search("lat=")+5, nodeData.indexOf(`"`,nodeData.search("lat=")+5))
                                 let long = nodeData.substring(nodeData.search("lon=")+5,nodeData.indexOf(`"/`,nodeData.search("lon=")+5))
                                 console.log("lat: "+lat+" long: "+long)
@@ -191,13 +169,7 @@ async function getNodeData(id){
 }
 async function getCrossRoads(nodeID){
     let ways = await getWays(nodeID)
-    // let nodeData = await getNodeData(nodeID)
     console.log("nodeID: "+nodeID)
-    // let lat = nodeData.substring(nodeData.search("lat=")+5, nodeData.indexOf(`"`,nodeData.search("lat=")+5))
-    // let long = nodeData.substring(nodeData.search("lon=")+5,nodeData.indexOf(`"/`,nodeData.search("lon=")+5))
-    // console.log("lat: "+lat+" long: "+long)
-
-    // console.log(ways.elements)
     let waysCount = 0
     let validWays = []
     if(ways.elements.length > 1){
