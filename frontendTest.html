@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+	<style>
+	html, body {
+		height: 100%;
+		padding: 0;
+		margin: 0;
+	}
+	#map {
+		/* configure the size of the map */
+		width: 100%;
+		height: 50%;
+	}
+</style>
+</head>
+<body>
+	<div id="map"></div>
+
+	<div id="request">
+		<p>
+			<label for="latitude">Latitude</label>
+			<input type="text" id="latitude" name="latitude">
+		</p>
+		<p>
+			<label for="longitude">Longitude</label>
+			<input type="text" id="longitude" name="longitude">
+		</p>
+		<p>
+			<input type="button" id="sendlocation" value="SendLocation">
+		</p>
+	</div>
+
+    <!-- <script src="server.js"></script> -->
+
+	<script>
+
+		// initialize Leaflet
+		let map = L.map('map').setView({lat: 31.225854, lon: 121.53415}, 16);
+
+		// add the OpenStreetMap tiles
+		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+			maxZoom: 19,
+			attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
+		}).addTo(map);
+
+		// show the scale bar on the lower left corner
+		L.control.scale({imperial: false, metric: true}).addTo(map);
+
+		// show a marker on the map
+		let marker = L.marker({lon: 0, lat: 0}).bindPopup('Last click').addTo(map);
+
+		// handle map click
+		map.on('click', function(e) {
+			marker.setLatLng(e.latlng);
+			document.getElementById('latitude').value = e.latlng.lat;
+			document.getElementById('longitude').value = e.latlng.lng;
+		});
+
+		// handle "SendLocation" button click
+		document.getElementById('sendlocation').addEventListener('click', async function() {
+			let lat = document.getElementById('latitude').value;
+			let long = document.getElementById('longitude').value;
+
+			// let url = 'https://fierce-majestic-wood.glitch.me/SendLocation?lat=' + lat + '&long=' + long;
+
+            // let url = "https://fierce-majestic-wood.glitch.me/SendLocation?lat=31.25808&long=121.5755"
+			// let data = await fetch(url, {
+			// 	cache: 'no-cache',
+			// 	headers: {
+			// 		'Content-Type': 'application/json'
+			// 	},
+			// });
+
+            let data = await fetch('https://fierce-majestic-wood.glitch.me/SendLocation?lat=31.25808&long=121.5755')
+
+			let response = await data.json();
+			console.log(response);
+
+			// it'd be easy to update a second marker on the map here,
+			// so that you see where the next waypoint would be
+		});
+	</script>
+</body>
+</html>

@@ -87,8 +87,8 @@ app.get('/SendLocation', async function(req, res) {
         // console.log("closestNode: "+closestNode) 
 
 
-        // https.get("https://www.openstreetmap.org/api/0.6/node/103990314/ways", (response)=>{
-            https.get(`https://www.openstreetmap.org/api/0.6/node/${closestNode}/ways`,(response)=>{
+        https.get("https://www.openstreetmap.org/api/0.6/node/103990314/ways", (response)=>{
+            // https.get(`https://www.openstreetmap.org/api/0.6/node/${closestNode}/ways`,(response)=>{
             let data = ""
             let crossroad;
             let crossroads = []
@@ -204,5 +204,7 @@ function twoPointDistance(x1,y1,x2,y2){
     // console.log(x1, x2,y1,y2)
     return dep;
 }
+
+
 
 
